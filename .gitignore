@@ -1,2 +1,4 @@
 **/.vagrant
 *.log
+id_ansible.*
+id_ansible
