@@ -1,2 +1,5 @@
 [wordpress]
 172.17.177.40
+
+[wordpress:vars]
+ansible_ssh_common_args='-o StrictHostKeyChecking=no'

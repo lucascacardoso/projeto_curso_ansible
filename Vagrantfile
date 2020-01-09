@@ -1,8 +1,9 @@
 $script_ansible = <<-SCRIPT
-apt-get update &&  \
-apt-get install -y software-properties-common && \
+apt update && \
+apt install -y software-properties-common && \
 apt-add-repository --yes ppa:ansible/ansible && \
-apt-get install -y ansible
+apt update && \
+apt install -y ansible
 SCRIPT
 
 Vagrant.configure("2") do |config|
