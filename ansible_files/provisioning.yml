@@ -18,3 +18,16 @@
         state: latest
       become: yes #executa como sudo
     
+    - name: 'Criação do banco do MySQL'
+      mysql_db:
+        login_user: root
+        name: wordpress_db
+        state: present
+        
+    - name: 'Criar usuário do MySQL para o Wordpress'
+      mysql_user:
+        login_user: root
+        name: wordpress_user
+        password: 123456
+        priv: 'wordpress_db.*:ALL' #format = 'db.table:priv'
+        state: present
