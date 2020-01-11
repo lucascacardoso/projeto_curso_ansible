@@ -24,6 +24,16 @@ Vagrant.configure("2") do |config|
     m.vm.provision "shell", inline: "cat /vagrant/chave/id_ansible.pub >> .ssh/authorized_keys"
   end
 
+  config.vm.define "mysql" do |m2|
+    m2.vm.network "private_network", ip: "172.17.177.42"
+
+    m2.vm.provider "virtualbox" do |vb|
+      vb.name = "ubuntu_trusty_mysql"
+    end
+
+    m2.vm.provision "shell", inline: "cat /vagrant/chave/id_ansible.pub >> .ssh/authorized_keys"
+  end  
+
   config.vm.define "ansible" do |ansible|
     ansible.vm.network "public_network", ip: "192.168.0.203", 
       bridge: "Qualcomm Atheros QCA9377 Wireless Network Adapter"

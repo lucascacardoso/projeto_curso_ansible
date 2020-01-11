@@ -1,7 +1,14 @@
 [wordpress]
 172.17.177.40
 
-[wordpress:vars]
+[database]
+172.17.177.42
+
+[app:children]
+wordpress
+database
+
+[app:vars]
 ansible_user=vagrant
 ansible_ssh_private_key_file=/chave/id_ansible
 ansible_ssh_common_args='-o StrictHostKeyChecking=no'

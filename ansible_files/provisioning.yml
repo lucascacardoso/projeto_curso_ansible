@@ -1,5 +1,32 @@
 ---
-- hosts: all
+- hosts: database
+  
+  tasks:
+    - name: 'Instala as dependências do SO'
+      apt: #usa o módulo apt que atualiza caso não esteja e instala
+        update_cache: yes
+        cache_valid_time: 3600 #1h
+        name:            
+            - mysql-server-5.6
+            - python-mysqldb          
+        state: latest
+      become: yes #executa como sudo
+    
+    - name: 'Criação do banco do MySQL'
+      mysql_db:
+        login_user: root
+        name: wordpress_db
+        state: present
+        
+    - name: 'Criar usuário do MySQL para o Wordpress'
+      mysql_user:
+        login_user: root
+        name: wordpress_user
+        password: 123456
+        priv: 'wordpress_db.*:ALL' #format = 'db.table:priv'
+        state: present
+
+- hosts: wordpress
 
   handlers:
     - name: restart apache
@@ -20,26 +47,10 @@
             - php5-gd
             - libssh2-php
             - php5-mcrypt
-            - mysql-server-5.6
-            - python-mysqldb
             - php5-mysql
         state: latest
       become: yes #executa como sudo
-    
-    - name: 'Criação do banco do MySQL'
-      mysql_db:
-        login_user: root
-        name: wordpress_db
-        state: present
         
-    - name: 'Criar usuário do MySQL para o Wordpress'
-      mysql_user:
-        login_user: root
-        name: wordpress_user
-        password: 123456
-        priv: 'wordpress_db.*:ALL' #format = 'db.table:priv'
-        state: present
-
     - name: 'Baixar Wordpress'
       get_url: #baixa arquivos para os hosts remotos
         url: https://wordpress.org/wordpress-5.0.tar.gz
