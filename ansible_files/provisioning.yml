@@ -1,5 +1,13 @@
 ---
 - hosts: all
+
+  handlers:
+    - name: restart apache
+      service:
+        name: apache2
+        state: restarted
+      become: yes
+
   tasks:
     - name: 'Instala as dependências do SO'
       apt: #usa o módulo apt que atualiza caso não esteja e instala
@@ -61,4 +69,13 @@
         - {regex: 'database_name_here', value: 'wordpress_db'}
         - {regex: 'username_here', value: 'wordpress_user'}
         - {regex: 'password_here', value: '123456'}
-      become: yes      
+      become: yes
+    
+    - name: 'Configura Apache para servir Wordpress'
+      copy:
+        src: /vagrant/000-default.conf
+        dest: /etc/apache2/sites-available/000-default.conf
+        remote_src: yes
+      become: yes
+      notify:
+        - restart apache  
