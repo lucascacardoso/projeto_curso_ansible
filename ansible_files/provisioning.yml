@@ -42,9 +42,9 @@
 
     - name: 'Baixar Wordpress'
       get_url: #baixa arquivos para os hosts remotos
-        url: https://wordpress.org/latest.tar.gz
+        url: https://wordpress.org/wordpress-5.0.tar.gz
         dest: /tmp/wordpress.tar.gz
-        timeout: 300
+        timeout: 420
 
     - name: 'Descompacta Wordpress'
       unarchive:

@@ -21,6 +21,7 @@ Vagrant.configure("2") do |config|
       vb.name = "ubuntu_trusty_wordpress"
     end
 
+    m.vm.provision "shell", inline: "cat /vagrant/chave/id_ansible.pub >> .ssh/authorized_keys"
   end
 
   config.vm.define "ansible" do |ansible|
