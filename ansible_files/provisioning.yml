@@ -1,5 +1,12 @@
 ---
 - hosts: database
+
+  handlers:
+    - name: restart mysql
+      service:
+        name: mysql
+        state: restarted
+      become: yes
   
   tasks:
     - name: 'Instala as dependências do SO'
@@ -25,6 +32,20 @@
         password: 123456
         priv: 'wordpress_db.*:ALL' #format = 'db.table:priv'
         state: present
+        host: "{{ item }}" #define a lista de hosts possíveis de se conectar com esse usuário
+      loop: 
+        - 'localhost'
+        - '127.0.0.1'
+        - '172.17.177.40'  
+    
+    - name: 'Configura MySQL para aceitar conexões remotas'
+      copy:
+        src: /vagrant/my.cnf
+        dest: /etc/mysql/my.cnf
+        remote_src: yes
+      become: yes
+      notify:
+        - restart mysql
 
 - hosts: wordpress
 
@@ -56,6 +77,8 @@
         url: https://wordpress.org/wordpress-5.0.tar.gz
         dest: /tmp/wordpress.tar.gz
         timeout: 420
+      tags:
+        - download  
 
     - name: 'Descompacta Wordpress'
       unarchive:
@@ -80,6 +103,7 @@
         - {regex: 'database_name_here', value: 'wordpress_db'}
         - {regex: 'username_here', value: 'wordpress_user'}
         - {regex: 'password_here', value: '123456'}
+        - {regex: 'localhost', value: '172.17.177.42'} #configura o WP com o ip do novo servidor mysql
       become: yes
     
     - name: 'Configura Apache para servir Wordpress'
