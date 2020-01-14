@@ -22,21 +22,21 @@
     - name: 'Criação do banco do MySQL'
       mysql_db:
         login_user: root
-        name: wordpress_db
+        name: "{{ wp_db_name }}"
         state: present
         
     - name: 'Criar usuário do MySQL para o Wordpress'
       mysql_user:
         login_user: root
-        name: wordpress_user
+        name: "{{ wp_username }}"
         password: 123456
-        priv: 'wordpress_db.*:ALL' #format = 'db.table:priv'
+        priv: "{{ wp_db_name }}.*:ALL" #format = 'db.table:priv'
         state: present
         host: "{{ item }}" #define a lista de hosts possíveis de se conectar com esse usuário
       loop: 
         - 'localhost'
         - '127.0.0.1'
-        - '172.17.177.40'  
+        - "{{ wp_host_ip }}"  
     
     - name: 'Configura MySQL para aceitar conexões remotas'
       copy:
@@ -86,6 +86,8 @@
         dest: /var/www
         remote_src: yes #está realizando a operação na máquina controlada
       become: yes #apenas o root pode mexer na pasta /var/www
+      tags:
+        - download
     
     - name: 'Criando nosso arquivo de configurações Wordpress'
       copy:
@@ -100,17 +102,16 @@
         regexp: "{{ item.regex }}"
         replace: "{{ item.value }}"
       loop:
-        - {regex: 'database_name_here', value: 'wordpress_db'}
-        - {regex: 'username_here', value: 'wordpress_user'}
-        - {regex: 'password_here', value: '123456'}
-        - {regex: 'localhost', value: '172.17.177.42'} #configura o WP com o ip do novo servidor mysql
+        - {regex: 'database_name_here', value: "{{ wp_db_name }}"}
+        - {regex: 'username_here', value: "{{ wp_username }}"}
+        - {regex: 'password_here', value: "{{ wp_user_password }}"}
+        - {regex: 'localhost', value: "{{ wp_db_ip }}"} #configura o WP com o ip do novo servidor mysql
       become: yes
     
     - name: 'Configura Apache para servir Wordpress'
-      copy:
-        src: /vagrant/000-default.conf
-        dest: /etc/apache2/sites-available/000-default.conf
-        remote_src: yes
+      template:
+        src: /vagrant/ansible_files/templates/000-default.conf.j2
+        dest: /etc/apache2/sites-available/000-default.conf        
       become: yes
       notify:
         - restart apache  
