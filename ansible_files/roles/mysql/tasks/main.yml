@@ -1,0 +1,36 @@
+---
+- name: 'Instala as dependências do SO'
+  apt: #usa o módulo apt que atualiza caso não esteja e instala
+    update_cache: yes
+    cache_valid_time: 3600 #1h
+    name:            
+        - mysql-server-5.6
+        - python-mysqldb          
+    state: latest
+  become: yes #executa como sudo
+        
+- name: 'Criação do banco do MySQL'
+  mysql_db:
+    login_user: root
+    name: "{{ wp_db_name }}"
+    state: present
+            
+- name: 'Criar usuário do MySQL para o Wordpress'
+  mysql_user:
+    login_user: root
+    name: "{{ wp_username }}"
+    password: 123456
+    priv: "{{ wp_db_name }}.*:ALL" #format = 'db.table:priv'
+    state: present
+    host: "{{ item }}" #define a lista de hosts possíveis de se conectar com esse usuário
+  loop: 
+    - "{{ wp_host_ip }}"  
+        
+- name: 'Configura MySQL para aceitar conexões remotas'
+  copy:
+    src: /vagrant/ansible_files/roles/files/my.cnf
+    dest: /etc/mysql/my.cnf
+    remote_src: yes
+  become: yes
+  notify:
+    - restart mysql
